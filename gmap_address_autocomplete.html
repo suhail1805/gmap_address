@@ -1,0 +1,72 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+</head>
+<body>
+
+<input type="text" class="search"  placeholder="Search location" id="#loc" onKeyUp="test();"></input> <br />
+<div id="googleMap" style="width:400px;height:100px;"></div>
+
+<script src="http://maps.googleapis.com/maps/api/js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">  </script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    
+
+<script>
+  function initializeMap(lat,lon, locArray)
+  {
+    var inp = $('.search').val();
+    for (var i in locArray)
+        if (locArray[i].label == inp)
+        { 
+          lat = locArray[i].lat;
+          lon = locArray[i].lon;
+          break;
+        }
+    
+    var mapOpt = {
+      center:new google.maps.LatLng(lat,lon),
+      zoom:5,
+      mapTypeId:google.maps.MapTypeId.ROADMAP
+      };
+    var map=new google.maps.Map(document.getElementById("googleMap"),mapOpt);
+    marker = new google.maps.Marker({
+       position: new google.maps.LatLng(lat,lon),
+        map: map,
+        draggable: true
+    });
+  }
+
+  function test() {
+     var inp = $('.search').val();
+     geocoder = new google.maps.Geocoder();
+     var b = geocoder.geocode({
+       'address': inp
+     }, function(results, status) {
+
+       var a = $.map(results, function(item) {
+         return {
+           label: item.formatted_address, // appears in dropdown box
+           value: item.formatted_address, // input element when selected
+           geocode: item, // all geocode data not in used
+           lat: item.geometry.location.H,
+           lon: item.geometry.location.L
+         }
+       });
+       
+       var locations = [];
+       for (var i in a)
+         locations.push(a[i].label)
+       
+       // generate autocomplete
+       $('.search').autocomplete({
+         source: locations,
+         select: initializeMap(18.975,72.825,a) //map initialize
+       });
+
+     });
+   }
+  $(".search").data("ui-autocomplete")._trigger("select")
+</script>
+</body>
+</html>
